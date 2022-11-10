@@ -1,0 +1,541 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Synced apps with Flutter and Atlas App Services</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="assets/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="synced-app-with-flutter-realm"
+                  title="Synced apps with Flutter and Atlas App Services"
+                  environment="web"
+                  feedback-link="markandeypathak@live.com">
+    
+      <google-codelab-step label="Overview" duration="2">
+        <p>Welcome to the workshop <strong>Synced Apps with Flutter and Atlas App Services</strong>. In this workshop, we will learn about what Atlas App Services are and how we can leverage them to build a synced <em>Shopping List</em> application capable of working offline.</p>
+<h2 is-upgraded>What we will build</h2>
+<p class="image-container"><img alt="Login Screen" src="img/f97afaa69e03689a.png"></p>
+<p class="image-container"><img alt="Login Screen" src="img/1deeb8486d710182.png"></p>
+<p class="image-container"><img alt="Login Screen" src="img/100e21910494c122.png"></p>
+<h2 is-upgraded>What will you need?</h2>
+<ol type="1">
+<li>A <strong>can-do</strong> attitude</li>
+<li>A <strong>MongoDB</strong> Account (we will create a <em>Free account</em> if you don&#39;t already have one)</li>
+<li>A machine with <strong>Flutter</strong> SDK installed</li>
+<li>A <strong>simulator</strong> configured (Android/iPhone/MacOS)</li>
+</ol>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Atlas App Services" duration="5">
+        <p><strong><em>Atlas Application Services</em></strong> are fully-managed backend services and APIs that help you build apps, integrate services, and connect to your Atlas data faster.</p>
+<h2 is-upgraded>Atlas Device Sync</h2>
+<p>You&#39;re developing a mobile app. Your users want their data saved in the cloud and accessible from their other devices. Network access on a mobile device can be intermittent, so you write data locally on the device first. A background process then synchronizes the data to the cloud and resolves any conflicting writes.</p>
+<p>Atlas Device Sync provides all of the above, so you can build better apps faster.</p>
+<h2 is-upgraded>Key Features</h2>
+<ol type="1">
+<li><strong>Realm in the Front, MongoDB in the Back</strong> - Atlas Device Sync is a bridge between client apps using the Realm SDKs and a MongoDB instance running in Atlas. Realm is a lightweight database optimized for mobile development.</li>
+<li><strong>Robust &amp; Secure</strong> - Device Sync handles conflicts for you, so you don&#39;t have to write complex custom code to resolve conflicting writes from multiple clients. A user-based permissions system lets you control who can access which data.</li>
+<li><strong>&#34;Always-On&#34; Experience</strong> - Realm Database and Device Sync seamlessly handle intermittent connectivity so users can continue using your app regardless of their current network status.</li>
+</ol>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Creating an Atlas App" duration="5">
+        <h2 is-upgraded>Create (or login to) your MongoDB account</h2>
+<p>Head <a href="https://account.mongodb.com/account/login" target="_blank">here</a> to login or create a MongoDB account</p>
+<h2 is-upgraded>Create a cluster</h2>
+<p class="image-container"><img alt="Create a cluster" src="img/ce6ec78a0521f288.png"></p>
+<h2 is-upgraded>Create a database user (optional)</h2>
+<p class="image-container"><img alt="Create a database user" src="img/a591bf03117175a5.png"></p>
+<h2 is-upgraded>Allow network access (optional)</h2>
+<p class="image-container"><img alt="Allow network access" src="img/de42244b2ffabc4f.png"></p>
+<h2 is-upgraded>Create a new App</h2>
+<p class="image-container"><img alt="Create a new App" src="img/56d9caa241d64cd9.png"></p>
+<p class="image-container"><img alt="Create a blank App" src="img/45b595226905547e.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Enabling Email Authentication" duration="2">
+        <p class="image-container"><img alt="Enable email authentication" src="img/897b5ea33bafc923.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Creating a Flutter App" duration="3">
+        <h2 is-upgraded>Create a new flutter project</h2>
+<pre><code language="language-bash" class="language-bash">flutter create shopping_buddy
+</code></pre>
+<p>Above command will generate the boilerplate flutter project. Open the project folder with your favorite IDE. The folder structure will look something like below</p>
+<p class="image-container"><img alt="A new flutter project structure" src="img/7610623e92b874e6.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Adding Realm package" duration="2">
+        <p>Now that we have our project created, to use realm SDK, we need to add the Realm as a dependency. Add below line in your <code>pubspec.yaml</code></p>
+<pre><code language="language-yaml" class="language-yaml">  realm: ^0.6.0+beta
+</code></pre>
+<p>Run below command to download the dependencies.</p>
+<pre><code language="language-bash" class="language-bash">flutter pub get
+</code></pre>
+<p>Alternatively, you can run the below command to add and download the Realm SDK</p>
+<pre><code language="language-bash" class="language-bash">flutter pub add realm
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Creating Atlas App" duration="2">
+        <p><code>main.dart</code> and replace the contents with the code below</p>
+<pre><code language="language-dart" class="language-dart">import &#39;package:flutter/material.dart&#39;;
+import &#39;package:realm/realm.dart&#39;;
+import &#39;package:realm_sync_demo/screens/login_screen.dart&#39;;
+
+const appId = &#34;flutter-realm-app-vshsp&#34;;
+
+void main() {
+  final App atlasApp = App(AppConfiguration(appId));
+  runApp(MyApp(
+    atlasApp: atlasApp,
+  ));
+}
+
+class MyApp extends StatelessWidget {
+  final App atlasApp;
+
+  const MyApp({super.key, required this.atlasApp});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: &#39;Shopping List&#39;,
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: LoginScreen(atlasApp: atlasApp),
+    );
+  }
+}
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="User Login" duration="5">
+        <pre><code language="language-dart" class="language-dart">final Credentials credentials = Credentials.emailPassword(emailController.text, passwordController.text);
+await atlasApp.logIn(credentials);
+</code></pre>
+<h2 is-upgraded>The Login Screen</h2>
+<p>Let&#39;s create the login screen to allow the user to login using email and password. Create a directory named <code>screens</code> under <code>lib</code>. This directory will contain the screens for our application. Create a file named <code>login_screen.dart</code> and paste the below code.</p>
+<pre><code language="language-dart" class="language-dart">import &#39;package:flutter/foundation.dart&#39;;
+import &#39;package:flutter/material.dart&#39;;
+import &#39;package:realm/realm.dart&#39;;
+import &#39;package:realm_sync_demo/screens/home_screen.dart&#39;;
+import &#39;package:realm_sync_demo/services/item_service.dart&#39;;
+
+class LoginScreen extends StatelessWidget {
+  final App atlasApp;
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  LoginScreen({Key? key, required this.atlasApp}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.shopping_bag,
+                size: 100,
+                color: Colors.blueAccent,
+              ),
+              const SizedBox(
+                height: 30,
+              ),
+              const Text(&#34;Login&#34;,
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              const SizedBox(
+                height: 30,
+              ),
+              TextField(
+                  controller: emailController,
+                  decoration: const InputDecoration(
+                      hintText: &#34;Email&#34;, border: OutlineInputBorder())),
+              const SizedBox(
+                height: 15,
+              ),
+              TextField(
+                controller: passwordController,
+                decoration: const InputDecoration(
+                    hintText: &#34;Password&#34;, border: OutlineInputBorder()),
+                obscureText: true,
+              ),
+              const SizedBox(
+                height: 15,
+              ),
+              ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.all(20)),
+                  onPressed: () async {
+                    try {
+                      final navigator = Navigator.of(context);
+                      final Credentials credentials = Credentials.emailPassword(
+                          emailController.text, passwordController.text);
+                      await atlasApp.logIn(credentials);
+                      if (atlasApp.currentUser != null) {
+                        navigator.pushReplacement(
+                            MaterialPageRoute(builder: (BuildContext context) {
+                          return HomeScreen(
+                              atlasApp: atlasApp,
+                              itemService: ItemService(atlasApp.currentUser!));
+                        }));
+                      }
+                    } on RealmException catch (error) {
+                      if (kDebugMode) {
+                        print(&#34;Error during login ${error.message}&#34;);
+                      }
+                    }
+                  },
+                  child: const Text(&#34;Login&#34;, style: TextStyle(fontSize: 20)))
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Creating Schema" duration="5">
+        <p>After login, we need to allow the users to manage their shopping list. To do this, we first will create schemas which will control the structure of our data.</p>
+<p>Create a directory <code>schemas</code> under <code>lib</code>. Create a file named <code>item.dart</code> and paste the below code.</p>
+<pre><code language="language-dart" class="language-dart">import &#39;package:realm/realm.dart&#39;;
+
+part &#39;item.g.dart&#39;;
+
+@RealmModel()
+class _Item {
+  @PrimaryKey()
+  @MapTo(&#34;_id&#34;)
+  late ObjectId id;
+  late String text;
+  late bool done;
+  @MapTo(&#34;user_id&#34;)
+  late String userId;
+}
+</code></pre>
+<p>To generate the <code>RealmObject</code> based on the above model, run the below command. This will generate another file named <code>item.g.dart</code> which will be an extension of your <code>_Item</code> class declared above.</p>
+<pre><code language="language-bash" class="language-bash">flutter pub run realm generate
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Enabling Flexible Sync" duration="5">
+        <p>After declaring the schema, we can start saving the data locally. However, we are building a synced app. In order to enable the sync between devices, we need to configure a flexible sync for our Realm application.</p>
+<p>On MongoDB console UI, choose <strong><em>Device Sync</em></strong> option from left sidebar. We will use default configurations to enable a flexible sync.</p>
+<p class="image-container"><img alt="Enable Flexible Sync" src="img/606afea8d7250cae.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Opening a Synced Realm" duration="10">
+        <p>Now that we have our sync configured, we need to open a synced Realm in our application.</p>
+<pre><code language="language-dart" class="language-dart">Realm openRealm() {
+    var realmConfig = Configuration.flexibleSync(user, [Item.schema]);
+    var realm = Realm(realmConfig);
+    realm.subscriptions.update((mutableSubscriptions) {
+      mutableSubscriptions.add(realm.all&lt;Item&gt;());
+    });
+    return realm;
+}
+</code></pre>
+<h2 is-upgraded>Reading/Adding/Updating/Deleting Items</h2>
+<pre><code language="language-dart" class="language-dart">RealmResults&lt;Item&gt; getItems() {
+    return realm.all&lt;Item&gt;();
+}
+
+add(String text) {
+    realm
+        .write(() =&gt; {realm.add&lt;Item&gt;(Item(ObjectId(), text, false, user.id))});
+}
+
+toggleStatus(Item item) {
+    realm.write(() =&gt; {item.done = !item.done});
+}
+
+delete(Item item) {
+    realm.write(() =&gt; {realm.delete(item)});
+}
+</code></pre>
+<p>Create a directory <code>services</code> under <code>lib</code>. Create a new file named <code>item_service.dart</code> and paste the code below. This will contain a service class to easily work with our Realm.</p>
+<pre><code language="language-dart" class="language-dart">import &#39;package:realm/realm.dart&#39;;
+import &#39;../schemas/item.dart&#39;;
+
+class ItemService {
+  final User user;
+  late final Realm realm;
+
+  ItemService(this.user) {
+    realm = openRealm();
+  }
+
+  Realm openRealm() {
+    var realmConfig = Configuration.flexibleSync(user, [Item.schema]);
+    var realm = Realm(realmConfig);
+    realm.subscriptions.update((mutableSubscriptions) {
+      mutableSubscriptions.add(realm.all&lt;Item&gt;());
+    });
+    return realm;
+  }
+
+  RealmResults&lt;Item&gt; getItems() {
+    return realm.all&lt;Item&gt;();
+  }
+
+  add(String text) {
+    realm
+        .write(() =&gt; {realm.add&lt;Item&gt;(Item(ObjectId(), text, false, user.id))});
+  }
+
+  toggleStatus(Item item) {
+    realm.write(() =&gt; {item.done = !item.done});
+  }
+
+  delete(Item item) {
+    realm.write(() =&gt; {realm.delete(item)});
+  }
+}
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="The Home Screen" duration="10">
+        <p>We now will add another screen where the user can see the shopping list, add a new item and update/delete existing items.</p>
+<p>Create a new file under <code>screens</code> directory named <code>home_screen.dart</code> and paste the code below:</p>
+<pre><code language="language-dart" class="language-dart">import &#39;package:flutter/foundation.dart&#39;;
+import &#39;package:flutter/material.dart&#39;;
+import &#39;package:realm/realm.dart&#39;;
+import &#39;package:realm_sync_demo/services/item_service.dart&#39;;
+
+import &#39;../schemas/item.dart&#39;;
+import &#39;../styles.dart&#39;;
+
+class HomeScreen extends StatefulWidget {
+  final App atlasApp;
+  final ItemService itemService;
+
+  const HomeScreen(
+      {Key? key, required this.atlasApp, required this.itemService})
+      : super(key: key);
+
+  @override
+  State&lt;HomeScreen&gt; createState() =&gt; _HomeScreenState();
+}
+
+class _HomeScreenState extends State&lt;HomeScreen&gt; {
+  final _formKey = GlobalKey&lt;FormState&gt;();
+  late RealmResults&lt;Item&gt; allItems;
+
+  @override
+  void initState() {
+    super.initState();
+    allItems = widget.itemService.getItems();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text(&#34;Shopping List&#34;)),
+      body: StreamBuilder(
+        stream: allItems.changes,
+        builder: (BuildContext context,
+            AsyncSnapshot&lt;RealmResultsChanges&lt;Item&gt;&gt; snapshot) {
+          List&lt;Item&gt; items = [];
+          if (snapshot.hasData) {
+            items = snapshot.data!.results.toList();
+          }
+
+          return ListView.separated(
+              itemBuilder: (BuildContext context, int index) {
+                return ListTile(
+                  tileColor: items[index].done
+                      ? Colors.green.shade50
+                      : Colors.transparent,
+                  minLeadingWidth: 50,
+                  leading: IconButton(
+                    icon: Icon(
+                      items[index].done
+                          ? Icons.close_outlined
+                          : Icons.check_outlined,
+                      color: items[index].done
+                          ? Colors.grey.shade500
+                          : Colors.green.shade500,
+                      semanticLabel: &#34;Mark done&#34;,
+                    ),
+                    onPressed: () {
+                      widget.itemService.toggleStatus(items[index]);
+                    },
+                  ),
+                  trailing: IconButton(
+                    icon: Icon(
+                      Icons.delete_outline,
+                      color: Colors.red.shade500,
+                      semanticLabel: &#34;Delete item&#34;,
+                    ),
+                    onPressed: () {
+                      widget.itemService.delete(items[index]);
+                    },
+                  ),
+                  title: Text(items[index].text),
+                );
+              },
+              separatorBuilder: (BuildContext context, int index) {
+                return Divider(
+                    height: 0, thickness: 1, color: Colors.grey.shade400);
+              },
+              itemCount: items.length);
+        },
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showDialog(context: context, builder: dialogBuilder);
+        },
+        tooltip: &#34;Add item&#34;,
+        child: const Icon(
+          Icons.add,
+          size: 50,
+        ),
+      ),
+    );
+  }
+
+  Widget dialogBuilder(BuildContext context) {
+    late String itemName;
+
+    return Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          decoration: BoxDecoration(
+              color: Colors.white, borderRadius: BorderRadius.circular(10)),
+          padding: Styles.largePadding,
+          child: Wrap(
+            children: [
+              Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ...createTextFormField(&#34;Item name&#34;,
+                          placeholder: &#34;Enter item name&#34;,
+                          isRequired: true, onSaved: (value) {
+                        itemName = value!;
+                      }),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Center(
+                        child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                                padding: Styles.largePadding),
+                            onPressed: () {
+                              if (_formKey.currentState!.validate()) {
+                                _formKey.currentState!.save();
+                                if (kDebugMode) {
+                                  print(itemName);
+                                }
+                                widget.itemService.add(itemName);
+
+                                Navigator.pop(context);
+                              }
+                            },
+                            child: const Text(
+                              &#34;Add&#34;,
+                              style: Styles.label,
+                            )),
+                      )
+                    ],
+                  )),
+            ],
+          ),
+        ));
+  }
+
+  List&lt;Widget&gt; createTextFormField(String label,
+      {String? placeholder,
+      bool isRequired = false,
+      Function(String?)? onSaved}) {
+    return [
+      Text(label, style: Styles.label),
+      const SizedBox(
+        height: 5,
+      ),
+      TextFormField(
+        onSaved: onSaved,
+        validator: (value) {
+          return isRequired &amp;&amp; (value == null || value.isEmpty)
+              ? &#34;$label is required&#34;
+              : null;
+        },
+        decoration: InputDecoration(hintText: placeholder),
+      )
+    ];
+  }
+}
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Summary" duration="3">
+        
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Congratulation" duration="1">
+        <p class="image-container"><img alt="Congratulations" src="img/e950c90e2f0a9a20.png"></p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="assets/codelab-elements/native-shim.js"></script>
+  <script src="assets/codelab-elements/custom-elements.min.js"></script>
+  <script src="assets/codelab-elements/prettify.js"></script>
+  <script src="assets/codelab-elements/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

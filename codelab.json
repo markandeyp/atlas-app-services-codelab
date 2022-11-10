@@ -1,0 +1,30 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "assets",
+  "mainga": "UA-49880327-14",
+  "updated": "2022-11-10T06:18:24Z",
+  "id": "synced-app-with-flutter-realm",
+  "duration": 60,
+  "title": "Synced apps with Flutter and Atlas App Services",
+  "authors": "Markandey Pathak",
+  "summary": "Synced apps with Flutter and Atlas App Services",
+  "source": "CODELAB.md",
+  "theme": "",
+  "status": [
+    "published"
+  ],
+  "category": [
+    "flutter",
+    "atlasappservices"
+  ],
+  "tags": [
+    "atlassync",
+    "flutter",
+    "mongodb",
+    "realm",
+    "web"
+  ],
+  "feedback": "markandeypathak@live.com",
+  "url": "synced-app-with-flutter-realm"
+}
